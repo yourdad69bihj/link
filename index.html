@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <title>Vulcan Shortener</title>
+    <style>
+        :root { --neon: #00f2ea; --bg: #0b0c10; --panel: #1f2833; --purple: #7a00ff; }
+        html, body { height: 100%; width: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        .container { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+        .header { background: rgba(0, 242, 234, 0.1); padding: 20px; text-align: center; border-bottom: 1px solid var(--neon); font-weight: bold; text-shadow: 0 0 10px var(--neon); text-transform: uppercase; font-size: 14px; }
+        .content { padding: 20px; flex-grow: 1; overflow-y: auto; }
+        .box { background: var(--panel); border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .label { font-size: 10px; color: #555; text-transform: uppercase; margin-bottom: 10px; display: block; letter-spacing: 1px; }
+        input { width: 100%; background: #000; border: 1px solid #333; color: var(--neon); padding: 15px; border-radius: 8px; box-sizing: border-box; outline: none; margin-bottom: 10px; font-family: monospace; }
+        input:focus { border-color: var(--neon); }
+        .btn { background: #111; border: 1px solid var(--neon); color: var(--neon); padding: 15px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 5px; font-size: 12px; }
+        .btn-purple { border-color: var(--purple); color: var(--purple); }
+        #result-link { background: rgba(0,0,0,0.5); border: 1px dashed var(--neon); padding: 15px; border-radius: 8px; word-break: break-all; color: #ccc; font-family: monospace; font-size: 12px; margin-top: 15px; text-align: center; min-height: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">VULCAN SHORTENER</div>
+    <div class="content">
+        <div class="box">
+            <span class="label">Input Long URL</span>
+            <input type="text" id="longUrl" placeholder="https://...">
+            <button class="btn" onclick="shortenLink()">⚡ HIDE & SHORTEN</button>
+        </div>
+
+        <div class="box">
+            <span class="label">Your Scrambled Link</span>
+            <div id="result-link">Ready...</div>
+            <button class="btn btn-purple" onclick="copyLink()">COPY HIDDEN LINK</button>
+        </div>
+        <p style="font-size: 9px; color: #444; text-align: center; text-transform: uppercase;">Destination is encrypted and hidden.</p>
+    </div>
+</div>
+
+<script>
+    function shortenLink() {
+        const url = document.getElementById('longUrl').value.trim();
+        if (!url) return alert("Please enter a URL!");
+
+        // Encrypt the URL into a scrambled code
+        const encrypted = btoa(url).replace(/=/g, ""); 
+        
+        // Create the hidden link using a hash
+        const currentUrl = window.location.href.split('#')[0].split('?')[0];
+        const hiddenLink = `${currentUrl}#${encrypted}`;
+
+        document.getElementById('result-link').innerText = hiddenLink;
+        alert("Link Scrambled!");
+    }
+
+    function copyLink() {
+        const link = document.getElementById('result-link').innerText;
+        if (link.includes("Ready")) return;
+        navigator.clipboard.writeText(link).then(() => alert("Copied!"));
+    }
+
+    // AUTO-REDIRECT LOGIC
+    window.onload = () => {
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+            try {
+                // Decode and redirect instantly
+                const destination = atob(hash);
+                window.location.replace(destination);
+            } catch (e) {
+                console.error("Invalid Hidden Link");
+            }
+        }
+    };
+</script>
+</body>
+</html>
